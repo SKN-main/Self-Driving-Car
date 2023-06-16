@@ -132,9 +132,9 @@ IMAGE_SIZE = (1280, 720)
 class Car:
     def __init__(self) -> None:
         self.lane_detector = LaneDetector()
-        self.left_tracker = Tracker((0.2, 0.7), 200)
+        self.left_tracker = Tracker((0.3, 0.7), 200)
         # self.right_tracker = Tracker((0.8, 0.7), 100)
-        self.right_tracker = Tracker((0.8, 0.7), 200)
+        self.right_tracker = Tracker((0.7, 0.7), 200)
         # self.left_tracker = Tracker((250, 500), 190)
         # self.right_tracker = Tracker((950, 500), 190)
         self.direction = Direction.STRAIGHT
@@ -209,13 +209,14 @@ class Car:
         elif self.left_tracker.is_active:
             self.recent_tracker = self.left_tracker
 
-        if self.turn is not None:
-            if self.turn.value == Direction.LEFT and not self.right_tracker.is_active:
+        if turn is not None and turn.value != Direction.STRAIGHT.value:
+            if turn.value == Direction.LEFT and not self.right_tracker.is_active:
                 self.direction = Direction.LEFT
                 self.turn = Direction.LEFT
-            elif self.turn.value == Direction.RIGHT and not self.left_tracker.is_active:
+            elif turn.value == Direction.RIGHT and not self.left_tracker.is_active:
                 self.direction = Direction.RIGHT
                 self.turn = Direction.RIGHT
+
             turn_value = 100
         else:
             if turn.value == Direction.LEFT.value:
@@ -228,7 +229,7 @@ class Car:
                 self.straight()
                 self.turn = None
 
-            turn_value = abs(int(self.recent_tracker.deviation)//2)
+            turn_value = abs(int(self.recent_tracker.deviation//2))
 
 
         # if (self.prev_sign == 'c12' or self.prev_sign == 'c2') and self.detected_sign is None:
