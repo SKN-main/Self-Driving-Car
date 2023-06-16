@@ -1,0 +1,35 @@
+1. Obsługa sterowania platformą
+    - ustawienie mocy silnika
+        - sterowanie bezpośrednie lub sterowanie prędkością 
+    - ustawienie kąta skrętu kół
+    - ustawienie pozycji serw kamery
+        - motion smoothing (konfigurowalny)? i/lub PID
+
+2. Obsługa czujników
+    - czujniki odległości - Ultrasonic
+    - czujnik odległości TOF
+    - enkoder (?)
+    - IMU
+    - GPS
+
+3. protokół komunikacyjny Teensy - Jetson
+    - kontrola poprawności przesyłu danych (kompletności)
+    - znaczniki początku i końca pakietu
+    - rodzaje wiadomości
+        - Silniki (bezpośrednio) i STOP
+        - skręt kół
+        - polecenia (utrzymuj prędkość, poruszaj się po łuku/trajektorii) ?
+        - serwa kamery (ustawianie oraz informacja zwrotna o aktualnej pozycji)
+        - dane z czujników odległości (TOF i Ultrasonic)
+        - dane z enkodera (po przetworzeniu - prędkość, oraz surowe)
+        - dane z IMU (przyspieszenie i żyroskop)
+        - sterowanie ręczne/sterowanie autonomiczne
+    - mozliwość przełączenia na sterowanie ręczne oraz autonomiczne z mozliwością ręcznej ingerencji
+    - sygnal heartbeat do/z platformy
+
+4. interfejs watchdog (podjęcie priorytetowej akcji na zdarzenie lub jego brak); oparte o przerwania/Timer
+    - na brak sygnalu heartbeat i/lub poleceń
+    - na brak danych z GPS
+    - na sygnał o obecności przeszkody z czujników odległości
+    - inne/dowolne
+
