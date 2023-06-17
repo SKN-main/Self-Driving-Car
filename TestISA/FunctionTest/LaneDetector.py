@@ -3,7 +3,7 @@ import numpy as np
 import time
 from scipy.optimize import curve_fit
 from Direction import Direction
-
+from Queue import Queue
 
 IMAGE_SIZE = (1280, 720)
 
@@ -84,6 +84,7 @@ class LaneDetector:
         self.distance_points = []
         self.center_pointer = [(IMAGE_SIZE[0]//2, IMAGE_SIZE[1]-30), (IMAGE_SIZE[0]//2, IMAGE_SIZE[1])]
         self.distances = []
+        self.distances = Queue(10)
         self.roi_height = 0.4
 
     def apply_mask(self, image):
@@ -124,7 +125,7 @@ class LaneDetector:
         if not x:
             x = self.center_pointer[0][0]
 
-        while i < self.center_pointer[1][1]+1:
+        while i < self.center_pointer[1][1]:
             y = self.center_pointer[1][1]-1-i
             if mask[y, x, 0] == 255:
                 return y
@@ -134,9 +135,9 @@ class LaneDetector:
     def get_distances(self, mask):
         distance = self.get_distance(mask)
         if distance:
-            self.distances.append(distance)
+            self.distances.add(distance)
         else:
-            self.distances = []
+            self.distances.clear()
 
     def is_approaching_lane(self):
         if len(self.distances) > 3:
@@ -147,7 +148,7 @@ class LaneDetector:
     def check_turn(self, mask):
         center_x = self.center_pointer[0][0]
         points = []
-        for x in range(center_x - 50, center_x + 51, 10):
+        for x in range(center_x - 100, center_x + 101, 10):
             distance = self.get_distance(mask, x)
             if distance is not None:
                 points.append(distance)
@@ -167,9 +168,10 @@ class LaneDetector:
         mask = self.apply_mask(image)
         mask = self.get_roi(mask)
         self.get_distances(mask)
-        is_approaching_lane = self.is_approaching_lane()
-        if is_approaching_lane:
-            direction = self.check_turn(mask)
+        # is_approaching_lane = self.is_approaching_lane()
+        # if is_approaching_lane:
+        direction = self.check_turn(mask)
+        if direction.value != Direction.STRAIGHT.value:
             cv2.putText(mask, direction.name + " turn detected", (100, 100), 1, 3, (0, 0, 255), 2)
         else:
             direction = Direction.STRAIGHT

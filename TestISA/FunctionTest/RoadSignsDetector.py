@@ -8,7 +8,9 @@ class RoadSignsDetector():
     COLORS = [(255, 0, 0), (0, 255, 255), (0, 255, 0), (0, 0, 255)]
 
     def __init__(self, weights, confidence_rate=0.5) -> None:
-        self.model = torch.hub.load('ultralytics/yolov5', 'custom', path=weights)
+        # self.model = torch.hub.load('ultralytics/yolov5', 'yolov5', path=weights)
+        self.model = torch.hub.load('yolov5', 'custom', path=weights, source='local')
+
         self.predicted_signs = []
         self.confidence_rate = confidence_rate
 
