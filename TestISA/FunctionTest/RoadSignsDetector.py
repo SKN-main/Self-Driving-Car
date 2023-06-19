@@ -8,7 +8,7 @@ class RoadSignsDetector():
     COLORS = [(255, 0, 0), (0, 255, 255), (0, 255, 0), (0, 0, 255)]
 
     def __init__(self, weights, confidence_rate=0.5) -> None:
-        # self.model = torch.hub.load('ultralytics/yolov5', 'yolov5', path=weights)
+        # self.model = torch.hub.load('ultralytics/yolov5', 'custom', path=weights)
         self.model = torch.hub.load('yolov5', 'custom', path=weights, source='local')
 
         self.predicted_signs = []
@@ -59,7 +59,7 @@ class RoadSignsDetector():
 
 if __name__ == '__main__':
     cap = cv2.VideoCapture(1)
-    detector = RoadSignsDetector('weights/20e_street_20e_printed.pt')
+    detector = RoadSignsDetector('20e_street_20e_printed.pt')
 
     if not cap.isOpened():
         print("Cannot open camera")

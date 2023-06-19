@@ -11,7 +11,6 @@ import serial
 from Car import Car
 from flask import Response, Flask
 
-
 inputWidth = 1280
 inputHeight = 720
 inputFrameRate = 30
@@ -19,13 +18,13 @@ inputFrameRate = 30
 rescaledWidth = 848
 rescaledHeight = 480
 
-arduino = serial.Serial(port='/dev/ttyACM0', baudrate=115200, timeout=.05)
+# arduino = serial.Serial(port='/dev/ttyACM0', baudrate=115200, timeout=.05)
 
-def write_read(x):
-    arduino.write(bytes(x, 'utf-8'))
-    time.sleep(0.05)
-    data = arduino.readline()
-    return data
+# def write_read(x):
+#     arduino.write(bytes(x, 'utf-8'))
+#     time.sleep(0.05)
+#     data = arduino.readline()
+#     return data
 
 
 def get_frame(input):
@@ -41,15 +40,30 @@ def get_frame(input):
 
 
 def main():
-    car = Car()
-    vs = JetsonVideoStream(captureResolution=(inputWidth,inputHeight), outputResolution=(rescaledWidth, rescaledHeight), frameRate=inputFrameRate)
-    vs.start()
-    time.sleep(2.0)
+    car = Car(False, True)
+
+    # vs = JetsonVideoStream(captureResolution=(inputWidth,inputHeight), outputResolution=(rescaledWidth, rescaledHeight), frameRate=inputFrameRate)
+
+    # vs.start()
+    # time.sleep(2.0)
     action = None
+    vs = cv2.VideoCapture(0)
+    vs.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
+    vs.set(cv2.CAP_PROP_FRAME_WIDTH, inputWidth)
+    vs.set(cv2.CAP_PROP_FRAME_HEIGHT, inputHeight)
+    vs.set(cv2.CAP_PROP_FPS, 30)
+
+    # vs = cv2.VideoCapture("gst-launch-1.0 nvcamerasrc fpsRange='15.0 15.0' sensor-id=1 ! video/x-raw(memory:NVMM), width=(int)4056, height=(int)3040, format=(string)I420, framerate=(fraction)15/1 ! nvtee ! nvvidconv flip-method=2 ! video/x-raw, format=(string)I420 ! xvimagesink -e")
+    if not vs.isOpened():
+        print(":c")
+        return
 
     is_finish = False
     while not is_finish:
-        image = vs.read()
+        success, image = vs.read()
+
+        if not success:
+            continue
         
         mask, frame_with_road_sign, direction, turn_value = car(image)
 
@@ -59,6 +73,8 @@ def main():
             action = f'd-{turn_value}'
         elif direction.value == Direction.LEFT.value:
             action = f'a-{turn_value}'
+        elif direction.value == Direction.STOP.value:
+            action = 'r-0'
         else:
             action = 'w-0'
 
@@ -71,7 +87,7 @@ def main():
             is_finish = True
             action = 'r-0'
         
-        write_read(action)
+        # write_read(action)
 
 
 
@@ -81,7 +97,7 @@ def main():
         #     continue
         
         # yield(b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + bytearray(img) + b'\r\n')
-    vs.stop()
+    # vs.stop()
     
 
 app = Flask(__name__)
